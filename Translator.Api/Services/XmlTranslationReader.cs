@@ -19,8 +19,15 @@ namespace Translator.Api.Services
                     log.LogInformation("Success! Translation exists");
                     return res.Value;
                 }
+                else
+                {
+                    log.LogInformation($"The requested resource does not exist for {lang}");
+                }
             }
-            log.LogInformation($"The requested resource group does not exist for {lang}");
+            else
+            {
+                log.LogInformation($"The requested resource group does not exist for {lang}");
+            }
             return null;
         }
     }
