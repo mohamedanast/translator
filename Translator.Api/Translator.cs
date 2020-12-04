@@ -20,7 +20,7 @@ namespace Translator.Api
     {
         [FunctionName("Translator")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "{lang}/{resourceGroup}_{resource}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "translation/{lang}/{resourceGroup}_{resource}")] HttpRequest req,
             string lang, string resourceGroup, string resource,
             ILogger log)
         {
@@ -28,26 +28,23 @@ namespace Translator.Api
 
             try
             {
+                // Load configurations
                 string storageConnString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
                 string langFilesContainerName = Environment.GetEnvironmentVariable("LanaguageFilesContainer");
 
-                IBlobReader blobReader = new BlobReader();
+                // Get the blob reader and get the required translation file.
+                TranslatorFactory translatorFactory = new TranslatorFactory();
+                IBlobReader blobReader = translatorFactory.GetBlobReader();
                 BlobDownloadInfo languageFile = await blobReader.ReadBlobAsync(storageConnString, langFilesContainerName, $"{lang}.xml");
                 if (languageFile != null)
                 {
-                    XElement translations = XElement.Load(languageFile.Content);
-                    var resGroup = translations.Element(resourceGroup);
-                    if (resGroup != null)
+                    // Read the requested resource from the translation file
+                    ITranslationReader translationReader = translatorFactory.GetTranslationReader();
+                    string result = translationReader.ReadResource(lang, resourceGroup, resource, log, languageFile.Content);
+                    if (!string.IsNullOrEmpty(result))
                     {
-                        var res = resGroup.Element(resource);
-                        if (res != null)
-                        {
-                            // Translation exist for resource.
-                            log.LogInformation("Success! Translation exists");
-                            return new OkObjectResult(res.Value);
-                        }
+                        return new OkObjectResult(result);
                     }
-                    log.LogInformation($"The requested resource group does not exist for {lang}");
                     return new BadRequestObjectResult("Requested resource does not exist");
                 }
 
@@ -61,6 +58,5 @@ namespace Translator.Api
             }
 
         }
-
     }
 }
