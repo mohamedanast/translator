@@ -7,6 +7,12 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Azure.Storage.Blobs;
+using System.Xml.Linq;
+using Azure.Storage.Blobs.Models;
+using Translator.Api.Services;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Translator.Api
 {
@@ -14,20 +20,47 @@ namespace Translator.Api
     {
         [FunctionName("Translator")]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "{lang}/{resourceGroup}_{resource}")] HttpRequest req,
+            string lang, string resourceGroup, string resource,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            log.LogInformation($"C# HTTP trigger function processed a request. Requested language: {lang}, resource group: {resourceGroup}, resource: {resource}");
 
-            string name = req.Query["name"];
+            try
+            {
+                string storageConnString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
+                string langFilesContainerName = Environment.GetEnvironmentVariable("LanaguageFilesContainer");
 
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic data = JsonConvert.DeserializeObject(requestBody);
-            name = name ?? data?.name;
+                IBlobReader blobReader = new BlobReader();
+                BlobDownloadInfo languageFile = await blobReader.ReadBlobAsync(storageConnString, langFilesContainerName, $"{lang}.xml");
+                if (languageFile != null)
+                {
+                    XElement translations = XElement.Load(languageFile.Content);
+                    var resGroup = translations.Element(resourceGroup);
+                    if (resGroup != null)
+                    {
+                        var res = resGroup.Element(resource);
+                        if (res != null)
+                        {
+                            // Translation exist for resource.
+                            log.LogInformation("Success! Translation exists");
+                            return new OkObjectResult(res.Value);
+                        }
+                    }
+                    log.LogInformation($"The requested resource group does not exist for {lang}");
+                    return new BadRequestObjectResult("Requested resource does not exist");
+                }
 
-            return name != null
-                ? (ActionResult)new OkObjectResult($"Hello, {name}")
-                : new BadRequestObjectResult("Please pass a name on the query string or in the request body");
+                log.LogInformation("Translations don't exist for the language");
+                return new BadRequestObjectResult("Translations don't exist for the language");
+            }
+            catch (Exception e)
+            {
+                log.LogError(e, "Unexpected error");
+                return new BadRequestResult();
+            }
+
         }
+
     }
 }
