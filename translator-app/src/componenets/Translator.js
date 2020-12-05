@@ -13,22 +13,14 @@ class Translator extends React.Component {
     onUpdate(action, value) {
         switch (action) {
             case Actions.CHANGE_LANG:
-                this.setState(prevState => {
-                    return { language: value };
-                });
+                this.setState(prevState => { return { language: value }; });
                 break;
             case Actions.CHANGE_RESGROUP:
-                this.setState(prevState => {
-                    return { resGroup: value };
-                });
+                this.setState({ resGroup: value });
                 break;
             case Actions.CHANGE_RESOURCE:
-                this.setState(prevState => {
-                    return { resource: value };
-                });
+                this.setState({ resource: value });
                 break;
-            default:
-                return;
         }
     }
 
@@ -57,13 +49,13 @@ class Translator extends React.Component {
                         <div className="form-group my-3">
                             <label htmlFor="resourceGroup">Resource Group</label>
                             <input type="text" value={this.state.resGroup} autoComplete="off" className="w-100"
-                                placeholder="e.g. Common" id="resourceGroup"
+                                placeholder="e.g. Common" id="resourceGroup" aria-label="resource group"
                                 onChange={(evt) => this.onUpdate(Actions.CHANGE_RESGROUP, evt.target.value)} />
                         </div>
                         <div className="form-group my-3">
                             <label htmlFor="resource">Resource</label>
                             <input type="text" value={this.state.resource} autoComplete="off" className="w-100"
-                                placeholder="e.g. CancelButtonText" id="resource"
+                                placeholder="e.g. CancelButtonText" id="resource" aria-label="resource"
                                 onChange={(evt) => this.onUpdate(Actions.CHANGE_RESOURCE, evt.target.value)} />
                         </div>
                         <input type="button" value="Get resource" onClick={this.fetchResource.bind(this)} className="col-sm-3 col-xs-6 my-1 btn-primary" />
@@ -98,7 +90,7 @@ export function fetchResourceFromApi(lang, resGroup, resource) {
                 resolve(data);
             })
             .catch(err => {
-                reject({ error: err });
+                reject(err);
             });
     });
 };
