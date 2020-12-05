@@ -12,3 +12,5 @@ Create a system assigned managed identity for the Function app, and then,
 	
 # Running locally
 Update local.settings.json with your storage connection string and container name in AzureWebJobsStorage & LanaguageFilesContainer keys respectively.
+Add the localhost address to Allowed origins in Function App -> CORS
+

@@ -21,7 +21,7 @@ class LangSelector extends React.Component {
         });
 
         return <Dropdown>
-            <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-100">
+            <Dropdown.Toggle variant="outline-primary" id="dropdown-basic" className="w-50">
                 {this.props.currentLang && <span>{this.props.currentLang.fullName}</span>}
                 {!this.props.currentLang && <span>Choose language</span>}
             </Dropdown.Toggle>
