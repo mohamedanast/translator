@@ -21,6 +21,8 @@ class Translator extends React.Component {
             case Actions.CHANGE_RESOURCE:
                 this.setState({ resource: value });
                 break;
+            default:
+                break;
         }
     }
 
