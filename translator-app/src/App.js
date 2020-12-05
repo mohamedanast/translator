@@ -7,10 +7,10 @@ import Translator from "./componenets/Translator"
 
 function App() {
     return (
-        <div className="App container">
+        <div className="App">
             <header className="App-header">
                 <img src={logo} className="App-logo" alt="logo" />
-                <h1 className="App-title display-2 my-2">Translator</h1>
+                <h1 className="App-title my-2">Translator</h1>
             </header>
             <Translator />
             <Footer />

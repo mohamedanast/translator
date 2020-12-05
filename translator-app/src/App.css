@@ -15,16 +15,17 @@
     display: flex;
     font-size: calc(10px + 2vmin);
     color: white;
+}
 
+.App-logo {
+    height: 15vmin;
+    pointer-events: none;
+}
 
-    .App-logo {
-        height: 15vmin;
-        pointer-events: none;
-    }
-
-    .App-title {
-        pointer-events: none;
-    }
+.App-title {
+    height: 12vmin;
+    pointer-events: none;
+    font-size: 10vmin;
 }
 
 .App-link {
